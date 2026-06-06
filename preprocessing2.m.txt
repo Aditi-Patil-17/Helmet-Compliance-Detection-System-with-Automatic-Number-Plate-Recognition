@@ -1,0 +1,38 @@
+% STAGE 2.5: DATASET AUGMENTATION (THE 90% PUSH)
+clear; clc;
+load('advanced_helmet_data.mat'); % Load your 54 samples
+
+original_X = training_features;
+original_Y = training_labels;
+
+aug_X = original_X;
+aug_Y = original_Y;
+
+fprintf('Original samples: %d. Starting Augmentation...\n', length(original_Y));
+
+for i = 1:length(original_Y)
+    feat = original_X(i, :);
+    label = original_Y(i);
+    
+    % Variation 1: Add slight Gaussian Noise to features (Simulates sensor grain)
+    noise_feat = feat + 0.01 * randn(size(feat));
+    
+    % Variation 2: Brightness Shift (Simulates 25% glare increase)
+    % We target the texture/intensity features (last few columns)
+    bright_feat = feat;
+    bright_feat(end-2:end) = bright_feat(end-2:end) * 1.25; 
+    
+    % Variation 3: Shadow Shift (Simulates 25% lighting drop)
+    dark_feat = feat;
+    dark_feat(end-2:end) = dark_feat(end-2:end) * 0.75;
+    
+    % Combine
+    aug_X = [aug_X; noise_feat; bright_feat; dark_feat];
+    aug_Y = [aug_Y; label; label; label];
+end
+
+training_features = aug_X;
+training_labels = aug_Y;
+
+save('augmented_helmet_data.mat', 'training_features', 'training_labels');
+fprintf('✅ SUCCESS: Dataset boosted to %d samples. Now run Stage 3!\n', length(aug_Y));
